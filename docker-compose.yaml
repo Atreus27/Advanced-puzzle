@@ -1,9 +1,0 @@
-version: "3.8"
-
-services:
-  puzzle-app:
-    build: .
-    container_name: advanced-puzzle
-    ports:
-      - "8000:8000"
-    restart: unless-stopped
