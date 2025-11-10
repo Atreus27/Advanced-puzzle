@@ -1,0 +1,257 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Advanced Puzzle App — Sudoku + Leaderboard</title>
+  <style>
+    :root {
+      --bg1: #ff7eb3;
+      --bg2: #65d6ce;
+      --card: rgba(255,255,255,0.9);
+      --glass: rgba(255,255,255,0.15);
+      --muted: #444;
+    }
+    html,body {
+      height: 100%;
+      margin: 0;
+      font-family: 'Inter', system-ui, Segoe UI, Roboto, Arial, sans-serif;
+    }
+    body {
+      background: linear-gradient(120deg, var(--bg1), #ffd86f, var(--bg2));
+      background-size: 400% 400%;
+      animation: gradient 12s ease infinite;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 24px;
+    }
+    @keyframes gradient {
+      0% { background-position: 0% 50%; }
+      50% { background-position: 100% 50%; }
+      100% { background-position: 0% 50%; }
+    }
+    .app {
+      width: 1100px;
+      max-width: 100%;
+      display: grid;
+      grid-template-columns: 1fr 360px;
+      gap: 18px;
+    }
+    .card {
+      background: var(--card);
+      border-radius: 14px;
+      padding: 18px;
+      box-shadow: 0 8px 30px rgba(0,0,0,0.15);
+    }
+    h1 {
+      margin: 0 0 8px 0;
+    }
+    table {
+      border-collapse: collapse;
+      margin-top: 12px;
+    }
+    td {
+      width: 40px;
+      height: 40px;
+      border: 1px solid rgba(0,0,0,0.08);
+      text-align: center;
+      font-weight: 600;
+      font-size: 18px;
+      transition: background 0.3s;
+    }
+    td:hover {
+      background: rgba(0,0,0,0.05);
+    }
+    .leaderboard {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+    .lb-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+    .lb-list {
+      background: var(--glass);
+      padding: 8px;
+      border-radius: 8px;
+      min-height: 240px;
+      overflow-y: auto;
+    }
+    .score-row {
+      display: flex;
+      justify-content: space-between;
+      padding: 8px;
+      border-bottom: 1px solid rgba(0,0,0,0.05);
+    }
+    .score-row:last-child {
+      border-bottom: none;
+    }
+    .muted {
+      color: var(--muted);
+      font-size: 13px;
+    }
+    input, select, button {
+      padding: 8px;
+      border-radius: 8px;
+      border: 1px solid rgba(0,0,0,0.1);
+      font-size: 14px;
+    }
+    button {
+      cursor: pointer;
+      background: linear-gradient(135deg, var(--bg1), var(--bg2));
+      color: #fff;
+      border: none;
+      font-weight: 600;
+      transition: transform 0.2s;
+    }
+    button:hover {
+      transform: scale(1.05);
+    }
+    @media(max-width: 900px) {
+      .app { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body>
+  <div class="app">
+    <div class="card">
+      <h1>Sudoku — Demo UI</h1>
+      <div class="muted">Generate puzzles, track your time, and compete on the leaderboard!</div>
+      <div style="margin-top:12px">
+        <label>Difficulty:</label>
+        <select id="diff">
+          <option>easy</option>
+          <option selected>medium</option>
+          <option>hard</option>
+          <option>extreme</option>
+        </select>
+        <button id="gen">Generate</button>
+        <button id="solve">Auto-solve</button>
+        <span id="timer" class="muted" style="margin-left:12px">Time: 0s</span>
+      </div>
+      <div id="board" style="margin-top:14px"></div>
+      <div style="margin-top:12px">
+        <label>Your name:</label>
+        <input id="name" placeholder="Player" />
+        <button id="submitScore">Submit Score</button>
+      </div>
+    </div>
+
+    <aside class="card leaderboard">
+      <div class="lb-header">
+        <div>
+          <strong>Leaderboard</strong>
+          <div class="muted">Top scores (lower is better)</div>
+        </div>
+        <div class="muted">Live</div>
+      </div>
+      <div id="lb" class="lb-list"></div>
+      <div class="muted" style="font-size:12px">
+        Tip: Finish a puzzle and click “Submit Score” to add your time.
+      </div>
+    </aside>
+  </div>
+
+  <script>
+    let currentGrid = null;
+    let startTs = null;
+    let timerInterval = null;
+
+    function startTimer() {
+      startTs = Date.now();
+      document.getElementById('timer').textContent = 'Time: 0s';
+      if (timerInterval) clearInterval(timerInterval);
+      timerInterval = setInterval(() => {
+        const s = Math.floor((Date.now() - startTs) / 1000);
+        document.getElementById('timer').textContent = 'Time: ' + s + 's';
+      }, 1000);
+    }
+
+    function stopTimer() {
+      if (timerInterval) clearInterval(timerInterval);
+      return Math.floor((Date.now() - startTs) / 1000);
+    }
+
+    async function fetchGrid() {
+      const d = document.getElementById('diff').value;
+      const res = await fetch('/api/puzzle/sudoku?difficulty=' + d);
+      const json = await res.json();
+      const grid = json.grid;
+      currentGrid = grid;
+      renderGrid(grid);
+      startTimer();
+    }
+
+    function renderGrid(grid) {
+      const container = document.getElementById('board');
+      const table = document.createElement('table');
+      for (let r = 0; r < 9; r++) {
+        const tr = document.createElement('tr');
+        for (let c = 0; c < 9; c++) {
+          const td = document.createElement('td');
+          td.textContent = grid[r][c] === 0 ? '' : grid[r][c];
+          tr.appendChild(td);
+        }
+        table.appendChild(tr);
+      }
+      container.innerHTML = '';
+      container.appendChild(table);
+    }
+
+    async function autoSolve() {
+      if (!currentGrid) return;
+      const res = await fetch('/api/puzzle/sudoku/solve', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ grid: currentGrid }),
+      });
+      const json = await res.json();
+      renderGrid(json.solution);
+      const secs = stopTimer();
+      alert('Solved in ' + secs + 's (auto-solver)');
+    }
+
+    async function loadLeaderboard() {
+      try {
+        const res = await fetch('/api/leaderboard');
+        const data = await res.json();
+        const el = document.getElementById('lb');
+        el.innerHTML = '';
+        data.scores.forEach((s, idx) => {
+          const row = document.createElement('div');
+          row.className = 'score-row';
+          row.innerHTML = `<div>#${idx + 1} ${s.name}</div><div>${s.score}s</div>`;
+          el.appendChild(row);
+        });
+      } catch (e) {
+        console.warn(e);
+      }
+    }
+
+    async function submitScore() {
+      const name = document.getElementById('name').value || 'Player';
+      const score = stopTimer() || 0;
+      try {
+        await fetch('/api/leaderboard', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ name, score }),
+        });
+        loadLeaderboard();
+      } catch (e) {
+        console.warn(e);
+      }
+    }
+
+    document.getElementById('gen').addEventListener('click', fetchGrid);
+    document.getElementById('solve').addEventListener('click', autoSolve);
+    document.getElementById('submitScore').addEventListener('click', submitScore);
+
+    // Load leaderboard on start
+    loadLeaderboard();
+  </script>
+</body>
+</html>
