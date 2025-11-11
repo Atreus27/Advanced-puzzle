@@ -1,0 +1,40 @@
+{% extends 'base.html' %}
+{% block content %}
+<h2>15-Puzzle</h2>
+<div id="board">
+<table>
+{% for row in board %}
+<tr>
+{% for cell in row %}
+<td data-val="{{cell}}">{{ '' if cell==0 else cell }}</td>
+{% endfor %}
+</tr>
+{% endfor %}
+</table>
+<button id="shuffle">Shuffle</button>
+</div>
+<script>
+async function refresh(board){
+const tds = document.querySelectorAll('#board td');
+let i=0;
+board.flat().forEach(v => { tds[i].textContent = v===0? '': v; tds[i].dataset.val = v; i++; });
+}
+document.querySelectorAll('#board td').forEach(td=>{
+td.addEventListener('click', async ()=>{
+const tile = td.dataset.val;
+if(!tile) return;
+const board = Array.from(document.querySelectorAll('#board td')).map(x=>Number(x.dataset.val));
+const reshaped = [];
+for(let r=0;r<4;r++) reshaped.push(board.slice(r*4, r*4+4));
+const res = await fetch('/api/fifteen/move', {method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({board: reshaped, tile})});
+const newb = await res.json();
+refresh(newb);
+});
+});
+document.getElementById('shuffle').addEventListener('click', async ()=>{
+const res = await fetch('/api/fifteen/shuffle');
+const b = await res.json();
+refresh(b);
+});
+</script>
+{% endblock %}
