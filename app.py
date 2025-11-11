@@ -6,6 +6,17 @@ from config import Config
 app = Flask(__name__)
 app.config.from_object(Config)
 
+# --- Health Check Routes (for Kubernetes & ALB) ---
+@app.route('/health')
+@app.route('/readyz')
+@app.route('/livez')
+def health():
+    """
+    Simple health check endpoints for Kubernetes and AWS ALB.
+    Returns 200 OK when app is healthy.
+    """
+    return jsonify(status="ok", message="Sudoku service healthy"), 200
+
 
 # --- Home route ---
 @app.route('/')
@@ -58,4 +69,5 @@ def api_fifteen_move():
 
 # --- Entry point ---
 if __name__ == '__main__':
+    # Debug flag comes from config, controlled via environment
     app.run(host='0.0.0.0', port=5000, debug=app.config['DEBUG'])
