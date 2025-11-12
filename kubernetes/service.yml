@@ -1,0 +1,16 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: sudoku-service
+  namespace: sudoku
+  labels:
+    app: sudoku
+spec:
+  type: LoadBalancer
+  selector:
+    app: sudoku
+  ports:
+    - name: http
+      protocol: TCP
+      port: 80
+      targetPort: 5000

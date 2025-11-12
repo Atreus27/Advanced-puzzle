@@ -1,0 +1,37 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: sudoku-deployment
+  namespace: sudoku
+  labels:
+    app: sudoku
+spec:
+  replicas: 3
+  selector:
+    matchLabels:
+      app: sudoku
+  template:
+    metadata:
+      labels:
+        app: sudoku
+    spec:
+      imagePullSecrets:
+        - name: ecr-registry-secret-sudoku
+      containers:
+        - name: sudoku
+          image: 959975882219.dkr.ecr.us-east-1.amazonaws.com/sudoku_kkr:latest
+          imagePullPolicy: Always
+          ports:
+            - containerPort: 5000
+          env:
+            - name: FLASK_DEBUG
+              value: "1"
+            - name: SECRET_KEY
+              value: "dev-secret"
+          resources:
+            requests:
+              memory: "256Mi"
+              cpu: "250m"
+            limits:
+              memory: "512Mi"
+              cpu: "500m"
