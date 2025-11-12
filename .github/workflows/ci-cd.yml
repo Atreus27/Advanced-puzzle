@@ -114,7 +114,7 @@ jobs:
             -Dsonar.projectKey=sudoku \
             -Dsonar.sources=. \
             -Dsonar.host.url=http://35.154.73.125:9000 \
-            -Dsonar.login=${{ secrets.SONAR_TOKEN }}
+            -Dsonar.token=${{ secrets.SONAR_TOKEN }}
 
   docker:
     name: Build and Push Docker Image to ECR
