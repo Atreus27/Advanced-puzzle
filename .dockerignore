@@ -1,0 +1,45 @@
+# Ignore Python cache and temp files
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+*.pdb
+*.db
+*.sqlite3
+
+# Ignore virtual environments
+venv/
+.env/
+.venv/
+
+# Ignore Git data
+.git/
+.gitignore
+
+# Ignore local dev configs
+*.log
+*.bak
+*.swp
+*.tmp
+.envrc
+.env
+.env.example
+
+# Ignore test data
+tests/
+reports/
+coverage/
+.pytest_cache/
+.tox/
+noxfile.py
+
+# Ignore IDE settings
+.vscode/
+.idea/
+
+# Ignore Docker and Kubernetes extras
+Dockerfile*
+docker-compose.yml
+k8.yml
+kubernetes/
+  

@@ -1,0 +1,59 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Virtual environments
+venv/
+.env/
+.envrc
+.venv/
+
+# Byte-compiled / optimized / DLL files
+*.pyc
+*.pyo
+*.pyd
+
+# Logs and reports
+*.log
+reports/
+coverage/
+*.xml
+
+# Test and cache files
+.pytest_cache/
+.tox/
+.nox/
+.cache/
+htmlcov/
+
+# IDE / Editor files
+.vscode/
+.idea/
+*.sublime-project
+*.sublime-workspace
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Docker
+*.pid
+*.tar
+*.bak
+docker-compose.override.yml
+
+# Kubernetes manifests (optional, if generated dynamically)
+kubernetes/generated/
+kubernetes/*.bak
+
+# Credentials / Secrets (DO NOT COMMIT)
+*.pem
+*.key
+*.crt
+secrets/
+config.json
+
+# GitHub Actions temporary files
+.github/workflows/*.bak
+.github/workflows/*.old
