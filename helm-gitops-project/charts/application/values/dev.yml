@@ -1,0 +1,32 @@
+deploymentName: application-dev
+namespace: application-dev
+
+environment: development
+port: 5000
+replicaCount: 2
+
+image:
+  repository: 959975882219.dkr.ecr.us-east-1.amazonaws.com/sudoku_kkr
+  tag: dev-latest
+  pullPolicy: Always   # fixed spelling (Was "Allways")
+
+service:
+  type: ClusterIP
+  port: 5000
+
+ingress:
+  enabled: true
+  className: nginx
+  hostname:
+    - dev.sudoku.kkr      # fixed incorrect nesting
+  path: /
+  annotations: {}
+  addRootPath: true
+
+resources:
+  requests:
+    memory: "64Mi"
+    cpu: "50m"
+  limits:
+    memory: "128Mi"
+    cpu: "100m"

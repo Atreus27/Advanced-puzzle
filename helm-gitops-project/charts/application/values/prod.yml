@@ -1,0 +1,32 @@
+deploymentName: application-prod
+namespace: application-prod
+
+environment: production
+port: 5000
+replicaCount: 3
+
+image:
+  repository: 959975882219.dkr.ecr.us-east-1.amazonaws.com/sudoku_kkr
+  tag: fd5212e6de919555a32a23abd5886a09afdc43d5
+  pullPolicy: Always
+
+service:
+  type: ClusterIP
+  port: 5000
+
+ingress:
+  enabled: true
+  className: nginx
+  path: /application-prod
+  hostnames:
+    - prod.sudoku.kkr   # fixed indentation + dash spacing
+  annotations: {}
+  addRootPath: true
+
+resources:
+  requests:
+    memory: "128Mi"
+    cpu: "100m"
+  limits:
+    memory: "256Mi"
+    cpu: "200m"
