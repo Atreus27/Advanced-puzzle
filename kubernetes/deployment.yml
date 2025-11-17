@@ -19,7 +19,7 @@ spec:
         - name: ecr-registry-secret-sudoku
       containers:
         - name: sudoku
-          image: 959975882219.dkr.ecr.us-east-1.amazonaws.com/sudoku_kkr:fd5212e6de919555a32a23abd5886a09afdc43d5
+          image: 959975882219.dkr.ecr.us-east-1.amazonaws.com/sudoku_kkr:49a7bbe8b560338b78eb73ab3814fc2b51cf0385
           imagePullPolicy: Always
           ports:
             - containerPort: 5000
